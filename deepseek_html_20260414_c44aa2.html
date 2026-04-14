@@ -4,7 +4,353 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
   <title>Page & Quill · offline bookstore</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ----- style.css (inlined) ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      background: #f9f7f5;
+      color: #1e1e2a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* header + persistent nav */
+    .app-header {
+      background: #ffffffd0;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+      border-bottom: 1px solid #e4dcd3;
+      padding: 1rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .logo h1 {
+      font-weight: 600;
+      font-size: 1.9rem;
+      letter-spacing: -0.5px;
+      color: #2c3e4e;
+    }
+    .logo span {
+      font-weight: 300;
+      font-size: 1rem;
+      margin-left: 6px;
+      color: #6b4f3c;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      padding: 0.7rem 1.4rem;
+      font-size: 1.05rem;
+      font-weight: 500;
+      border-radius: 40px;
+      color: #3a3a4e;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .nav-btn:hover {
+      background: #ede7e0;
+      border-color: #cdbcae;
+    }
+
+    .nav-btn.active {
+      background: #2c3e4e;
+      color: white;
+      box-shadow: 0 4px 8px rgba(44,62,78,0.15);
+      border-color: #2c3e4e;
+    }
+
+    /* main container — SPA view */
+    .app-main {
+      flex: 1;
+      max-width: 1280px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+    }
+
+    /* cards & grid */
+    .grid-catalog {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 2rem 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .book-card {
+      background: white;
+      border-radius: 20px;
+      padding: 1.5rem 1rem 1.5rem;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.02);
+      border: 1px solid #ece4db;
+      transition: transform 0.15s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .book-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -8px rgba(0,0,0,0.1);
+      border-color: #cdbcae;
+    }
+
+    .book-img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: #d9cdc0;
+      border-radius: 14px;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #4d3e32;
+      font-weight: 500;
+      font-size: 0.9rem;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
+      background: linear-gradient(145deg, #e6dbd0, #d4c5b8);
+    }
+
+    .book-title {
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .book-price {
+      font-weight: 600;
+      color: #1e5555;
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .btn {
+      border: none;
+      background: #ece4db;
+      padding: 0.6rem 1rem;
+      border-radius: 40px;
+      font-weight: 500;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+      flex: 1 0 auto;
+    }
+
+    .btn-primary {
+      background: #2c3e4e;
+      color: white;
+      box-shadow: 0 2px 6px rgba(44,62,78,0.2);
+    }
+    .btn-primary:hover {
+      background: #1f2e3a;
+    }
+    .btn-outline {
+      background: white;
+      border: 1px solid #b7a89b;
+    }
+    .btn-outline:hover {
+      background: #f0ebe6;
+    }
+    .btn-danger {
+      background: #f1e6e1;
+      color: #ac3a2e;
+      border-color: #e0cfc6;
+    }
+    .btn-danger:hover {
+      background: #e4cfc5;
+    }
+
+    /* detail view */
+    .detail-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3rem;
+      background: white;
+      border-radius: 28px;
+      padding: 2.2rem;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.03);
+      border: 1px solid #e9dfd6;
+    }
+
+    .detail-img {
+      flex: 1 1 240px;
+      min-width: 200px;
+      background: #cdbcae;
+      border-radius: 24px;
+      aspect-ratio: 3/4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2e3b3b;
+      font-weight: 500;
+    }
+    .detail-info {
+      flex: 2 1 300px;
+    }
+    .detail-info h2 {
+      font-size: 2.4rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .detail-price {
+      font-size: 2rem;
+      color: #1e5555;
+      margin: 0.8rem 0 1.2rem;
+    }
+    .detail-desc {
+      line-height: 1.6;
+      color: #3f3f55;
+      margin: 1.8rem 0;
+    }
+
+    /* cart page */
+    .cart-items {
+      margin: 1.5rem 0 2rem;
+    }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      padding: 1.2rem 0;
+      border-bottom: 1px solid #e2d7cd;
+    }
+    .cart-item-info {
+      flex: 2 1 180px;
+    }
+    .cart-item-name {
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+    .cart-item-price {
+      color: #346666;
+      font-weight: 500;
+    }
+    .cart-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .qty-btn {
+      background: #ede7e0;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 40px;
+      font-size: 1.4rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cart-qty {
+      min-width: 2rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    .cart-total {
+      text-align: right;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-top: 1.8rem;
+      border-top: 2px solid #ccc2b6;
+      padding-top: 1.8rem;
+    }
+
+    .empty-message {
+      padding: 3rem;
+      text-align: center;
+      background: #f3efeb;
+      border-radius: 32px;
+      color: #5b4d41;
+    }
+
+    /* home & about */
+    .hero {
+      background: #e7dfd6;
+      padding: 3rem 2.5rem;
+      border-radius: 48px;
+      text-align: center;
+    }
+    .hero h2 {
+      font-size: 2.6rem;
+      font-weight: 400;
+    }
+    .nav-links-inline {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+
+    .about-card {
+      background: white;
+      border-radius: 28px;
+      padding: 2.5rem;
+      border: 1px solid #ddd0c3;
+    }
+
+    /* utility */
+    .text-muted { color: #5f5f74; }
+    .mt-4 { margin-top: 1.8rem; }
+    .hidden { display: none !important; }
+
+    /* responsive */
+    @media (max-width: 600px) {
+      .header-inner {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .nav-menu {
+        justify-content: center;
+      }
+      .nav-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+      }
+      .detail-container {
+        padding: 1.5rem;
+      }
+      .hero h2 {
+        font-size: 2rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <header class="app-header">
@@ -13,15 +359,389 @@
         <h1>Page & Quill <span>offline editions</span></h1>
       </div>
       <nav class="nav-menu" id="mainNav">
-        <!-- Navigation links will be injected by JavaScript -->
+        <!-- navigation injected via js, but static fallback -->
       </nav>
     </div>
   </header>
 
   <main class="app-main" id="appView">
-    <!-- SPA content renders here dynamically -->
+    <!-- dynamic SPA content renders here -->
   </main>
 
-  <script src="script.js"></script>
+  <script>
+    // ----- script.js (fully vanilla, SPA + cart + localStorage) -----
+    (function(){
+      "use strict";
+
+      // ---------- DATA (mock books) ----------
+      const BOOKS = [
+        { id: 'b1', title: 'The Silent Garden', price: 18.99, description: 'A lyrical journey through hidden courtyards and quiet revelations. Perfect for slow afternoons.' },
+        { id: 'b2', title: 'Urban Tides', price: 22.50, description: 'A sharp, modern fable about change, cities, and the people who drift between them.' },
+        { id: 'b3', title: 'The Paper Lantern', price: 14.95, description: 'Historical mystery set in old Kyoto. Secrets, shadows, and soft light.' },
+        { id: 'b4', title: 'Recipes from the Blue Kitchen', price: 29.99, description: 'More than a cookbook — stories, comfort, and a splash of nostalgia.' },
+        { id: 'b5', title: 'Echoes of the Fjord', price: 17.25, description: 'Nordic noir meets family saga. Unputdownable.' },
+        { id: 'b6', title: 'Midnight Codex', price: 26.00, description: 'A bibliophile\'s dream wrapped in a tech thriller. Page-turner.' }
+      ];
+
+      // ---------- GLOBAL STATE ----------
+      let currentRoute = 'home';            // home, catalog, product, cart, about
+      let selectedProductId = null;         // for product detail
+      
+      // Cart state: array of { id, title, price, quantity }
+      let cart = [];
+
+      // ---------- LOCALSTORAGE ----------
+      const STORAGE_KEY = 'pagequill_cart';
+
+      function loadCartFromStorage() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            cart = JSON.parse(stored);
+            // ensure numbers (quantity/price) 
+            cart = cart.map(item => ({ ...item, quantity: Number(item.quantity), price: Number(item.price) }));
+          } else {
+            cart = [];
+          }
+        } catch (e) {
+          cart = [];
+        }
+      }
+
+      function saveCartToStorage() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+      }
+
+      // ---------- CART OPERATIONS ----------
+      function addToCart(bookId, bookTitle, bookPrice, quantity = 1) {
+        const existing = cart.find(item => item.id === bookId);
+        if (existing) {
+          existing.quantity += quantity;
+        } else {
+          cart.push({
+            id: bookId,
+            title: bookTitle,
+            price: Number(bookPrice),
+            quantity: quantity
+          });
+        }
+        saveCartToStorage();
+        renderView();           // re-render current view (cart or catalog)
+        updateNavActiveClass(); // keep nav highlight consistent
+      }
+
+      function removeFromCart(bookId) {
+        cart = cart.filter(item => item.id !== bookId);
+        saveCartToStorage();
+        renderView();
+        updateNavActiveClass();
+      }
+
+      function updateQuantity(bookId, delta) {
+        const item = cart.find(i => i.id === bookId);
+        if (!item) return;
+        const newQty = item.quantity + delta;
+        if (newQty <= 0) {
+          removeFromCart(bookId);
+        } else {
+          item.quantity = newQty;
+          saveCartToStorage();
+          renderView();
+          updateNavActiveClass();
+        }
+      }
+
+      function getCartTotal() {
+        return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      }
+
+      function getCartCount() {
+        return cart.reduce((count, item) => count + item.quantity, 0);
+      }
+
+      // ---------- ROUTING (SPA navigation) ----------
+      function navigateTo(route, productId = null) {
+        currentRoute = route;
+        if (route === 'product' && productId) {
+          selectedProductId = productId;
+        } else {
+          selectedProductId = null;
+        }
+        
+        // update url hash for consistency (optional, but helps)
+        window.location.hash = route + (productId ? '/'+productId : '');
+        
+        renderView();
+        updateNavActiveClass();
+      }
+
+      // restore route from hash (on page load)
+      function initRouteFromHash() {
+        const hash = window.location.hash.slice(1) || 'home';
+        const parts = hash.split('/');
+        let route = parts[0];
+        const validRoutes = ['home', 'catalog', 'product', 'cart', 'about'];
+        if (!validRoutes.includes(route)) route = 'home';
+        
+        if (route === 'product' && parts[1]) {
+          currentRoute = 'product';
+          selectedProductId = parts[1];
+        } else {
+          currentRoute = route;
+          selectedProductId = null;
+        }
+        renderView();
+        updateNavActiveClass();
+      }
+
+      // ---------- UI RENDER ----------
+      const appView = document.getElementById('appView');
+      const navContainer = document.getElementById('mainNav');
+
+      // Build persistent navigation
+      function renderNavigation() {
+        const routes = [
+          { id: 'home', label: 'Home' },
+          { id: 'catalog', label: 'Books' },
+          { id: 'cart', label: `Cart (${getCartCount()})` },
+          { id: 'about', label: 'About' }
+        ];
+        navContainer.innerHTML = routes.map(r => 
+          `<button class="nav-btn" data-route="${r.id}">${r.label}</button>`
+        ).join('');
+        
+        // attach listeners
+        navContainer.querySelectorAll('[data-route]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const route = btn.dataset.route;
+            navigateTo(route);
+          });
+        });
+      }
+
+      function updateNavActiveClass() {
+        // update active class
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          const route = btn.dataset.route;
+          if (route === currentRoute) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+          // update cart badge inside button
+          if (route === 'cart') {
+            btn.textContent = `Cart (${getCartCount()})`;
+          }
+        });
+      }
+
+      // main view rendering
+      function renderView() {
+        if (!appView) return;
+        
+        // refresh cart count on nav button
+        const cartBtn = navContainer.querySelector('[data-route="cart"]');
+        if (cartBtn) cartBtn.textContent = `Cart (${getCartCount()})`;
+
+        switch (currentRoute) {
+          case 'home': renderHome(); break;
+          case 'catalog': renderCatalog(); break;
+          case 'product': renderProductDetail(); break;
+          case 'cart': renderCart(); break;
+          case 'about': renderAbout(); break;
+          default: renderHome();
+        }
+      }
+
+      // ---------- PAGE RENDERERS ----------
+      function renderHome() {
+        appView.innerHTML = `
+          <div class="hero">
+            <h2>📚 Page & Quill</h2>
+            <p style="font-size:1.3rem; margin-top:1rem;">A quiet corner for book lovers. <br> Offline, always.</p>
+            <div class="nav-links-inline">
+              <button class="btn btn-primary" data-nav="catalog">Browse books</button>
+              <button class="btn btn-outline" data-nav="cart">View cart</button>
+            </div>
+            <p class="text-muted mt-4">✨ 100% offline · local storage cart</p>
+          </div>
+        `;
+        appView.querySelector('[data-nav="catalog"]')?.addEventListener('click', ()=> navigateTo('catalog'));
+        appView.querySelector('[data-nav="cart"]')?.addEventListener('click', ()=> navigateTo('cart'));
+      }
+
+      function renderCatalog() {
+        const booksHtml = BOOKS.map(book => `
+          <div class="book-card">
+            <div class="book-img">📖 ${book.title.substring(0,12)}</div>
+            <div class="book-title">${book.title}</div>
+            <div class="book-price">$${book.price.toFixed(2)}</div>
+            <div class="card-actions">
+              <button class="btn btn-outline view-detail" data-id="${book.id}">View</button>
+              <button class="btn btn-primary add-to-cart" data-id="${book.id}" data-title="${book.title}" data-price="${book.price}">Add to cart</button>
+            </div>
+          </div>
+        `).join('');
+        
+        appView.innerHTML = `
+          <section>
+            <h2 style="font-size:2rem; margin-bottom:0.5rem;">Our shelves</h2>
+            <p class="text-muted">Handpicked reads, ready to travel home.</p>
+            <div class="grid-catalog">
+              ${booksHtml}
+            </div>
+          </section>
+        `;
+        
+        // event delegation
+        appView.querySelectorAll('.view-detail').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = btn.dataset.id;
+            navigateTo('product', id);
+          });
+        });
+        appView.querySelectorAll('.add-to-cart').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = btn.dataset.id;
+            const title = btn.dataset.title;
+            const price = parseFloat(btn.dataset.price);
+            addToCart(id, title, price, 1);
+          });
+        });
+      }
+
+      function renderProductDetail() {
+        const book = BOOKS.find(b => b.id === selectedProductId);
+        if (!book) {
+          appView.innerHTML = `<p>Book not found. <button class="btn" data-nav="catalog">Back to catalog</button></p>`;
+          appView.querySelector('[data-nav="catalog"]')?.addEventListener('click', ()=> navigateTo('catalog'));
+          return;
+        }
+        appView.innerHTML = `
+          <div class="detail-container">
+            <div class="detail-img">📘 ${book.title}</div>
+            <div class="detail-info">
+              <h2>${book.title}</h2>
+              <div class="detail-price">$${book.price.toFixed(2)}</div>
+              <p class="detail-desc">${book.description} <br><small class="text-muted">(dummy description — offline edition)</small></p>
+              <div style="display:flex; gap:1rem;">
+                <button class="btn btn-primary" id="addFromDetail" style="padding:0.9rem 2rem;">Add to cart</button>
+                <button class="btn btn-outline" data-nav="catalog">← Back to books</button>
+              </div>
+            </div>
+          </div>
+        `;
+        document.getElementById('addFromDetail').addEventListener('click', () => {
+          addToCart(book.id, book.title, book.price, 1);
+        });
+        appView.querySelector('[data-nav="catalog"]').addEventListener('click', ()=> navigateTo('catalog'));
+      }
+
+      function renderCart() {
+        if (cart.length === 0) {
+          appView.innerHTML = `
+            <div class="empty-message">
+              <h2>🛒 Your cart is empty</h2>
+              <p>Find something you love in the catalog.</p>
+              <button class="btn btn-primary mt-4" data-nav="catalog">Explore books</button>
+            </div>
+          `;
+          appView.querySelector('[data-nav="catalog"]')?.addEventListener('click', ()=> navigateTo('catalog'));
+          return;
+        }
+
+        const itemsHtml = cart.map(item => `
+          <div class="cart-item" data-id="${item.id}">
+            <div class="cart-item-info">
+              <div class="cart-item-name">${item.title}</div>
+              <div class="cart-item-price">$${item.price.toFixed(2)} each</div>
+            </div>
+            <div class="cart-controls">
+              <button class="qty-btn dec-qty" data-id="${item.id}">−</button>
+              <span class="cart-qty">${item.quantity}</span>
+              <button class="qty-btn inc-qty" data-id="${item.id}">+</button>
+            </div>
+            <div style="margin-left:auto; font-weight:600;">$${(item.price * item.quantity).toFixed(2)}</div>
+            <button class="btn btn-danger remove-item" data-id="${item.id}" style="padding:0.4rem 1rem;">Remove</button>
+          </div>
+        `).join('');
+
+        const total = getCartTotal();
+
+        appView.innerHTML = `
+          <section>
+            <h2 style="font-size:2rem;">Your cart</h2>
+            <div class="cart-items">
+              ${itemsHtml}
+            </div>
+            <div class="cart-total">Total: $${total.toFixed(2)}</div>
+            <div style="display:flex; gap:1rem; margin-top:1rem;">
+              <button class="btn btn-primary" id="continueShopping">Continue shopping</button>
+              <button class="btn btn-outline" id="clearCartBtn">Clear cart</button>
+            </div>
+          </section>
+        `;
+
+        // Attach cart events
+        appView.querySelectorAll('.dec-qty').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = btn.dataset.id;
+            updateQuantity(id, -1);
+          });
+        });
+        appView.querySelectorAll('.inc-qty').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = btn.dataset.id;
+            updateQuantity(id, 1);
+          });
+        });
+        appView.querySelectorAll('.remove-item').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = btn.dataset.id;
+            removeFromCart(id);
+          });
+        });
+        document.getElementById('continueShopping')?.addEventListener('click', ()=> navigateTo('catalog'));
+        document.getElementById('clearCartBtn')?.addEventListener('click', ()=> {
+          cart = [];
+          saveCartToStorage();
+          renderView();
+          updateNavActiveClass();
+        });
+      }
+
+      function renderAbout() {
+        appView.innerHTML = `
+          <div class="about-card">
+            <h2 style="font-size:2.2rem;">📬 Page & Quill</h2>
+            <p style="margin: 1.5rem 0;">Est. 2026 · offline-first bookstore demo</p>
+            <p>📍 221B Paper Street, Literary Lane</p>
+            <p>📞 +1 (555) 204- BOOK</p>
+            <p>✉️ hello@pagequill.offline</p>
+            <p class="text-muted mt-4">This SPA works entirely offline. Cart saved in your browser.</p>
+          </div>
+        `;
+      }
+
+      // ---------- INITIALIZE ----------
+      function initApp() {
+        loadCartFromStorage();
+        renderNavigation();
+        
+        // listen to hash changes
+        window.addEventListener('hashchange', initRouteFromHash);
+        
+        // initial render based on hash or default
+        if (window.location.hash) {
+          initRouteFromHash();
+        } else {
+          navigateTo('home');
+        }
+      }
+
+      initApp();
+    })();
+  </script>
+  <!-- note: fully self-contained, no external calls, works offline -->
 </body>
 </html>
